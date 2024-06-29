@@ -200,7 +200,7 @@ const refreshAccessToken = asyncHandler( async(req, res) => {
             throw new ApiError(401, "Refresh token is expired or used")
         }
     
-        const options{
+        const options = {
             httpOnly: true,
             secure: true
         }
