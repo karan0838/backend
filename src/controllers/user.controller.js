@@ -94,10 +94,12 @@ const loginUser = asyncHandler(async (req, res) =>{
     //password check
     //access and referesh token
     //send cookie
-
+    
+    // Get user credentials from the request body
     const {email, username, password} = req.body
     console.log(email);
-
+    
+    // Ensure either username or email is provided
     if (!username && !email) {
         throw new ApiError(400, "username or email is required")
     }
@@ -106,30 +108,34 @@ const loginUser = asyncHandler(async (req, res) =>{
     // if (!(username || email)) {
     //     throw new ApiError(400, "username or email is required")
     // }
-
+    
+    // Find the user by username or email
     const user = await User.findOne({
         $or: [{username}, {email}]
     })
-
     if (!user) {
         throw new ApiError(404, "User does not exist")
     }
-
-   const isPasswordValid = await user.isPasswordCorrect(password)
-
-   if (!isPasswordValid) {
-    throw new ApiError(401, "Invalid user credentials")
+    
+    // Check if the provided password is correct
+    const isPasswordValid = await user.isPasswordCorrect(password)
+    if (!isPasswordValid) {
+        throw new ApiError(401, "Invalid user credentials")
     }
-
-   const {accessToken, refreshToken} = await generateAccessAndRefereshTokens(user._id)
-
+    
+    // Generate access and refresh tokens
+    const {accessToken, refreshToken} = await generateAccessAndRefereshTokens(user._id)
+    
+    // Retrieve the logged-in user's details excluding password and refresh token
     const loggedInUser = await User.findById(user._id).select("-password -refreshToken")
-
+    
+    // Set cookie options
     const options = {
         httpOnly: true,
         secure: true
     }
-
+    
+    // Send response with cookies for access and refresh tokens
     return res
     .status(200)
     .cookie("accessToken", accessToken, options)
