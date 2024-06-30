@@ -284,24 +284,27 @@ const updateAccountDetails = asyncHandler(async(req,res) => {
     if (!fullName || !email) {
         throw new ApiError(400, "All fields are required");
     }
-
+    
+    // Find the user by their ID and update the full name and email
     const user = User.findByIdAndUpdate(
-        req.user._id,
+        req.user?._id,
         {
             $set: {
                 fullName,
                 email
             }
         },
-        {new: true}
-    ).select("-password")
-
+        {new: true}                 // Return the updated document
+    ).select("-password")           // Exclude the password field from the returned document
+    
+    // Send a success response with the updated user details
     return res
     .status(200)
     .json(new ApiResponse(200, user, "Account details updated successfully"))
 })
 
 const updateUserAvatar = asyncHandler(async(req,res) => {
+    // Get the avatar file path from the request
     const avatarLocalPath = req.file?.path
 
     if(!avatarLocalPath) {
@@ -313,7 +316,8 @@ const updateUserAvatar = asyncHandler(async(req,res) => {
     if(!avatar.url) {
         throw new ApiError(400, "Error while uploading avatar");
     }
-
+    
+    // Update the user's avatar URL in the database
     const user = await User.findByIdAndUpdate(
         req.user?._id,
         {
