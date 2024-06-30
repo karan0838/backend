@@ -24,35 +24,28 @@ const generateAccessAndRefereshTokens = async(userId) => {
 }
 
 const registerUser = asyncHandler(async(req,res) => {
-    // get user details from frontend
-    // validation : not empty 
-    // check if user already exists : username and email
-    // check for images ,check for avatar
-    // upload them to cloudinary , avatar
-    // create user object - create entry in db
-    // remove password and refresh token field from response 
-    // check for user creation
-    //return response
-
+    
+    // Get user details from frontend
     const {fullName ,email, username, password } = req.body;
-
+    
+    // Validation: not empty
     if(
         [fullName, email, username, password].some((field) => field?.trim() === "")
     ) {
         throw new ApiError(400, "All fields are required");
     }
-
+    
+    // Check if user already exists: username and email
     const existedUser = await User.findOne({
         $or: [{ email }, { username }]
     })
-
     if(existedUser) {
         throw new ApiError(409, "User with username or email already exists")
     }
     
+    // Check for images, check for avatar
     const avatarLocalPath = req.files?.avatar[0]?.path;                 //it is optional finding " ?.?. "
     //const coverImageLocalPath = req.files?.coverImage[0]?.path;
-
     let coverImageLocalPath;
     if(req.files && Array.isArray(req.files.coverImage) && req.files.coverImage.length>0){
         coverImageLocalPath = req.files.coverImage[0].path;
@@ -61,14 +54,15 @@ const registerUser = asyncHandler(async(req,res) => {
     if(!avatarLocalPath) {
         throw new ApiError(400, "Avatar file is required");
     }
-
+    
+    // Upload avatar to Cloudinary
     const avatar = await uploadOnCloudinary(avatarLocalPath);
     const coverImage = await uploadOnCloudinary(coverImageLocalPath);
-
     if(!avatar) {
         throw new ApiError(400, "Avatar file is required");
     }
-
+    
+    // Create user object and save to database
     const user = await User.create({
         fullName,
         avatar: avatar.url,                        //required filed so no need to check 
@@ -77,15 +71,16 @@ const registerUser = asyncHandler(async(req,res) => {
         password,
         username: username.toLowerCase(),
     })
-
+    
+    // Remove password and refreshToken fields from response
     const createdUser = await User.findById(user._id).select(
         "-password -refreshToken"           //in this by default all entries are selected .so used '-' to remove any entry
     )
-
     if(!createdUser) {
         throw new ApiError(500, "Something went wrong while registering the user")
     }
-
+    
+    // Return response
     return res.status(201).json(
         new ApiResponse(200, createdUser, "User Registered Successfully")
     )
@@ -222,6 +217,14 @@ const refreshAccessToken = asyncHandler( async(req, res) => {
         throw new ApiError(401, error?.message || "Invalid refresh token")
     }
 
+})
+
+const changeCurrentPassword = asyncHandler(async(req,res) => {
+    // req.body -> password
+    // find user by id
+    // check if password is correct
+    // update password
+    // return response
 })
 
 export {
