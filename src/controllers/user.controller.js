@@ -153,6 +153,7 @@ const loginUser = asyncHandler(async (req, res) =>{
 })
 
 const logoutUser = asyncHandler( async(req, res) => {
+    // Find the user by ID and update the refreshToken to undefined
     await User.findByIdAndUpdate(
         req.user._id,
         {
@@ -164,12 +165,14 @@ const logoutUser = asyncHandler( async(req, res) => {
             new: true,
         }
     )
-
+    
+    // Set cookie options
     const options = {
         httpOnly : true,
         secure : true,               //only can modify with server
     }
-
+    
+    // Clear accessToken and refreshToken cookies and send a success response
     return res
    .status(200)
    .clearCookie("accessToken", options)
