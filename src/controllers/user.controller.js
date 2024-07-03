@@ -4,6 +4,7 @@ import { User } from "../models/user.model.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import jwt from "jsonwebtoken"
+import { Subscription } from "../models/subscription.model.js";
 
 
 const generateAccessAndRefereshTokens = async(userId) => {
@@ -383,7 +384,7 @@ const getUserChannelProfile = asyncHandler(async(req,res) => {
     const channel = await User.aggregate([
         {
             $match : {
-                username: username?.toLowerCase();
+                username: username?.toLowerCase()
             }
         },
         {
@@ -391,7 +392,25 @@ const getUserChannelProfile = asyncHandler(async(req,res) => {
                 from: "subscriptions",            // lowercase and plural
                 localField: "_id",
                 foreignField: "channel",
-                as: "following"
+                as: "subscribers"
+            }
+        },
+        {
+            $lookup: {
+                from: "subscriptions",            // lowercase and plural
+                localField: "_id",
+                foreignField: "subscriber",
+                as: "subscribedTo"
+            }
+        },
+        {
+            $addFields: {                         //adding more fields
+                subscribersCount:{                //
+                    $size: "$subscribers"
+                },
+                channelsSubscribedToCount: {
+                    $size: "$subscribedTo"
+                }
             }
         }
     ])
