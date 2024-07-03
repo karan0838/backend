@@ -413,13 +413,15 @@ const getUserChannelProfile = asyncHandler(async(req,res) => {
                 },
                 isSubscribed: {                   // tells if subsc to channel or not
                     $cond: {
-                        if: {$in: [req.user?._id, "$subscribers.subscriber"]}
+                        if: {$in: [req.user?._id, "$subscribers.subscriber"]},
+                        then: true,
+                        else : false
                     }
                 }
             }
         },
         {
-            $project: {
+            $project: {                           //project the specified fields
                 fullName: 1,
                 username: 1,
                 avatar: 1,
@@ -427,7 +429,7 @@ const getUserChannelProfile = asyncHandler(async(req,res) => {
                 subscribersCount: 1,
                 channelsSubscribedToCount: 1,
                 email: 1,
-
+                isSubscribed: 1
             }
         }
     ])
