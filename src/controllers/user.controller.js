@@ -1,10 +1,10 @@
-import {asyncHandler} from "../utils/asyncHandler.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
 import {ApiError} from "../utils/ApiError.js"
-import { User } from "../models/user.model.js";
-import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import { User} from "../models/user.model.js"
+import {uploadOnCloudinary} from "../utils/cloudinary.js"
 import { ApiResponse } from "../utils/ApiResponse.js";
 import jwt from "jsonwebtoken"
-import { Subscription } from "../models/subscription.model.js";
+import mongoose from "mongoose";
 
 
 const generateAccessAndRefereshTokens = async(userId) => {
@@ -160,8 +160,8 @@ const logoutUser = asyncHandler( async(req, res) => {
     await User.findByIdAndUpdate(
         req.user._id,
         {
-            $unset: {
-                refreshToken: 1           //this removes field from document
+            $unset: {                //this removes field from document(1 work as flag)
+                refreshToken: 1
             }
         },
         {
