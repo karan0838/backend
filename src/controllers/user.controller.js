@@ -452,6 +452,14 @@ const getWatchHistory = asyncHandler(async(req,res) => {
             $match:{
                 _id: new mongoose.Types.ObjectId(req.user._id)            //manually convert it to mongodb id
             }
+        },
+        {
+            $lookup: {
+                from: "videos",            // lowercase and plural
+                localField: "_id",
+                foreignField: "owner",
+                as: "watchHistory"
+            }
         }
     ])
 })
