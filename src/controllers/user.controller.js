@@ -411,7 +411,7 @@ const getUserChannelProfile = asyncHandler(async(req,res) => {
                 channelsSubscribedToCount: {      // number of channels subscribed to
                     $size: "$subscribedTo"
                 },
-                isSubscribed: {                   // tells if subsc to channel or not
+                isSubscribed: {                   // tells if subsc to channel or not(button)
                     $cond: {
                         if: {$in: [req.user?._id, "$subscribers.subscriber"]},
                         then: true,
@@ -421,7 +421,7 @@ const getUserChannelProfile = asyncHandler(async(req,res) => {
             }
         },
         {
-            $project: {                           //project the specified fields
+            $project: {                           // project the specified fields
                 fullName: 1,
                 username: 1,
                 avatar: 1,
@@ -443,6 +443,17 @@ const getUserChannelProfile = asyncHandler(async(req,res) => {
     .json(
         new ApiResponse(200, channel[0], "User channel fetched successfully")
     )
+})
+
+const getWatchHistory = asyncHandler(async(req,res) => {
+    //req.user._id                 //it gives us only string. mongoose convert it to mongodb id.
+    const user = await User.aggregate([
+        {
+            $match:{
+                _id: new mongoose.Types.ObjectId(req.user._id)            //manually convert it to mongodb id
+            }
+        }
+    ])
 })
 
 export {
